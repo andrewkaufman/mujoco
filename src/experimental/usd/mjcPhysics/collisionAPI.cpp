@@ -1,207 +1,279 @@
-// Copyright 2025 DeepMind Technologies Limited
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// Copyright 2016 Pixar
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// Licensed under the terms set forth in the LICENSE.txt file available at
+// https://openusd.org/license.
 //
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 #include <mujoco/experimental/usd/mjcPhysics/collisionAPI.h>
+#include "pxr/usd/usd/schemaRegistry.h"
+#include "pxr/usd/usd/typed.h"
 
-#include <pxr/usd/sdf/assetPath.h>
-#include <pxr/usd/sdf/types.h>
-#include <pxr/usd/usd/schemaRegistry.h>
-#include <pxr/usd/usd/typed.h>
+#include "pxr/usd/sdf/types.h"
+#include "pxr/usd/sdf/assetPath.h"
 
 PXR_NAMESPACE_OPEN_SCOPE
 
 // Register the schema with the TfType system.
-TF_REGISTRY_FUNCTION(TfType) {
-  TfType::Define<MjcPhysicsCollisionAPI, TfType::Bases<UsdAPISchemaBase> >();
+TF_REGISTRY_FUNCTION(TfType)
+{
+    TfType::Define<MjcPhysicsCollisionAPI,
+        TfType::Bases< UsdAPISchemaBase > >();
+    
 }
 
 /* virtual */
-MjcPhysicsCollisionAPI::~MjcPhysicsCollisionAPI() {}
+MjcPhysicsCollisionAPI::~MjcPhysicsCollisionAPI()
+{
+}
 
 /* static */
-MjcPhysicsCollisionAPI MjcPhysicsCollisionAPI::Get(const UsdStagePtr& stage,
-                                                   const SdfPath& path) {
-  if (!stage) {
-    TF_CODING_ERROR("Invalid stage");
+MjcPhysicsCollisionAPI
+MjcPhysicsCollisionAPI::Get(const UsdStagePtr &stage, const SdfPath &path)
+{
+    if (!stage) {
+        TF_CODING_ERROR("Invalid stage");
+        return MjcPhysicsCollisionAPI();
+    }
+    return MjcPhysicsCollisionAPI(stage->GetPrimAtPath(path));
+}
+
+
+/* virtual */
+UsdSchemaKind MjcPhysicsCollisionAPI::_GetSchemaKind() const
+{
+    return MjcPhysicsCollisionAPI::schemaKind;
+}
+
+/* static */
+bool
+MjcPhysicsCollisionAPI::CanApply(
+    const UsdPrim &prim, std::string *whyNot)
+{
+    return prim.CanApplyAPI<MjcPhysicsCollisionAPI>(whyNot);
+}
+
+/* static */
+MjcPhysicsCollisionAPI
+MjcPhysicsCollisionAPI::Apply(const UsdPrim &prim)
+{
+    if (prim.ApplyAPI<MjcPhysicsCollisionAPI>()) {
+        return MjcPhysicsCollisionAPI(prim);
+    }
     return MjcPhysicsCollisionAPI();
-  }
-  return MjcPhysicsCollisionAPI(stage->GetPrimAtPath(path));
+}
+
+/* static */
+const TfType &
+MjcPhysicsCollisionAPI::_GetStaticTfType()
+{
+    static TfType tfType = TfType::Find<MjcPhysicsCollisionAPI>();
+    return tfType;
+}
+
+/* static */
+bool 
+MjcPhysicsCollisionAPI::_IsTypedSchema()
+{
+    static bool isTyped = _GetStaticTfType().IsA<UsdTyped>();
+    return isTyped;
 }
 
 /* virtual */
-UsdSchemaKind MjcPhysicsCollisionAPI::_GetSchemaKind() const {
-  return MjcPhysicsCollisionAPI::schemaKind;
+const TfType &
+MjcPhysicsCollisionAPI::_GetTfType() const
+{
+    return _GetStaticTfType();
 }
 
-/* static */
-bool MjcPhysicsCollisionAPI::CanApply(const UsdPrim& prim,
-                                      std::string* whyNot) {
-  return prim.CanApplyAPI<MjcPhysicsCollisionAPI>(whyNot);
+UsdAttribute
+MjcPhysicsCollisionAPI::GetGroupAttr() const
+{
+    return GetPrim().GetAttribute(MjcPhysicsTokens->mjcGroup);
 }
 
-/* static */
-MjcPhysicsCollisionAPI MjcPhysicsCollisionAPI::Apply(const UsdPrim& prim) {
-  if (prim.ApplyAPI<MjcPhysicsCollisionAPI>()) {
-    return MjcPhysicsCollisionAPI(prim);
-  }
-  return MjcPhysicsCollisionAPI();
+UsdAttribute
+MjcPhysicsCollisionAPI::CreateGroupAttr(VtValue const &defaultValue, bool writeSparsely) const
+{
+    return UsdSchemaBase::_CreateAttr(MjcPhysicsTokens->mjcGroup,
+                       SdfValueTypeNames->Int,
+                       /* custom = */ false,
+                       SdfVariabilityUniform,
+                       defaultValue,
+                       writeSparsely);
 }
 
-/* static */
-const TfType& MjcPhysicsCollisionAPI::_GetStaticTfType() {
-  static TfType tfType = TfType::Find<MjcPhysicsCollisionAPI>();
-  return tfType;
+UsdAttribute
+MjcPhysicsCollisionAPI::GetShellInertiaAttr() const
+{
+    return GetPrim().GetAttribute(MjcPhysicsTokens->mjcShellinertia);
 }
 
-/* static */
-bool MjcPhysicsCollisionAPI::_IsTypedSchema() {
-  static bool isTyped = _GetStaticTfType().IsA<UsdTyped>();
-  return isTyped;
+UsdAttribute
+MjcPhysicsCollisionAPI::CreateShellInertiaAttr(VtValue const &defaultValue, bool writeSparsely) const
+{
+    return UsdSchemaBase::_CreateAttr(MjcPhysicsTokens->mjcShellinertia,
+                       SdfValueTypeNames->Bool,
+                       /* custom = */ false,
+                       SdfVariabilityUniform,
+                       defaultValue,
+                       writeSparsely);
 }
 
-/* virtual */
-const TfType& MjcPhysicsCollisionAPI::_GetTfType() const {
-  return _GetStaticTfType();
+UsdAttribute
+MjcPhysicsCollisionAPI::GetPriorityAttr() const
+{
+    return GetPrim().GetAttribute(MjcPhysicsTokens->mjcPriority);
 }
 
-UsdAttribute MjcPhysicsCollisionAPI::GetGroupAttr() const {
-  return GetPrim().GetAttribute(MjcPhysicsTokens->mjcGroup);
+UsdAttribute
+MjcPhysicsCollisionAPI::CreatePriorityAttr(VtValue const &defaultValue, bool writeSparsely) const
+{
+    return UsdSchemaBase::_CreateAttr(MjcPhysicsTokens->mjcPriority,
+                       SdfValueTypeNames->Int,
+                       /* custom = */ false,
+                       SdfVariabilityUniform,
+                       defaultValue,
+                       writeSparsely);
 }
 
-UsdAttribute MjcPhysicsCollisionAPI::CreateGroupAttr(
-    VtValue const& defaultValue, bool writeSparsely) const {
-  return UsdSchemaBase::_CreateAttr(
-      MjcPhysicsTokens->mjcGroup, SdfValueTypeNames->Int,
-      /* custom = */ false, SdfVariabilityUniform, defaultValue, writeSparsely);
+UsdAttribute
+MjcPhysicsCollisionAPI::GetConDimAttr() const
+{
+    return GetPrim().GetAttribute(MjcPhysicsTokens->mjcCondim);
 }
 
-UsdAttribute MjcPhysicsCollisionAPI::GetShellInertiaAttr() const {
-  return GetPrim().GetAttribute(MjcPhysicsTokens->mjcShellinertia);
+UsdAttribute
+MjcPhysicsCollisionAPI::CreateConDimAttr(VtValue const &defaultValue, bool writeSparsely) const
+{
+    return UsdSchemaBase::_CreateAttr(MjcPhysicsTokens->mjcCondim,
+                       SdfValueTypeNames->Int,
+                       /* custom = */ false,
+                       SdfVariabilityUniform,
+                       defaultValue,
+                       writeSparsely);
 }
 
-UsdAttribute MjcPhysicsCollisionAPI::CreateShellInertiaAttr(
-    VtValue const& defaultValue, bool writeSparsely) const {
-  return UsdSchemaBase::_CreateAttr(
-      MjcPhysicsTokens->mjcShellinertia, SdfValueTypeNames->Bool,
-      /* custom = */ false, SdfVariabilityUniform, defaultValue, writeSparsely);
+UsdAttribute
+MjcPhysicsCollisionAPI::GetSolMixAttr() const
+{
+    return GetPrim().GetAttribute(MjcPhysicsTokens->mjcSolmix);
 }
 
-UsdAttribute MjcPhysicsCollisionAPI::GetPriorityAttr() const {
-  return GetPrim().GetAttribute(MjcPhysicsTokens->mjcPriority);
+UsdAttribute
+MjcPhysicsCollisionAPI::CreateSolMixAttr(VtValue const &defaultValue, bool writeSparsely) const
+{
+    return UsdSchemaBase::_CreateAttr(MjcPhysicsTokens->mjcSolmix,
+                       SdfValueTypeNames->Double,
+                       /* custom = */ false,
+                       SdfVariabilityUniform,
+                       defaultValue,
+                       writeSparsely);
 }
 
-UsdAttribute MjcPhysicsCollisionAPI::CreatePriorityAttr(
-    VtValue const& defaultValue, bool writeSparsely) const {
-  return UsdSchemaBase::_CreateAttr(
-      MjcPhysicsTokens->mjcPriority, SdfValueTypeNames->Int,
-      /* custom = */ false, SdfVariabilityUniform, defaultValue, writeSparsely);
+UsdAttribute
+MjcPhysicsCollisionAPI::GetSolRefAttr() const
+{
+    return GetPrim().GetAttribute(MjcPhysicsTokens->mjcSolref);
 }
 
-UsdAttribute MjcPhysicsCollisionAPI::GetConDimAttr() const {
-  return GetPrim().GetAttribute(MjcPhysicsTokens->mjcCondim);
+UsdAttribute
+MjcPhysicsCollisionAPI::CreateSolRefAttr(VtValue const &defaultValue, bool writeSparsely) const
+{
+    return UsdSchemaBase::_CreateAttr(MjcPhysicsTokens->mjcSolref,
+                       SdfValueTypeNames->DoubleArray,
+                       /* custom = */ false,
+                       SdfVariabilityUniform,
+                       defaultValue,
+                       writeSparsely);
 }
 
-UsdAttribute MjcPhysicsCollisionAPI::CreateConDimAttr(
-    VtValue const& defaultValue, bool writeSparsely) const {
-  return UsdSchemaBase::_CreateAttr(
-      MjcPhysicsTokens->mjcCondim, SdfValueTypeNames->Int,
-      /* custom = */ false, SdfVariabilityUniform, defaultValue, writeSparsely);
+UsdAttribute
+MjcPhysicsCollisionAPI::GetSolImpAttr() const
+{
+    return GetPrim().GetAttribute(MjcPhysicsTokens->mjcSolimp);
 }
 
-UsdAttribute MjcPhysicsCollisionAPI::GetSolMixAttr() const {
-  return GetPrim().GetAttribute(MjcPhysicsTokens->mjcSolmix);
+UsdAttribute
+MjcPhysicsCollisionAPI::CreateSolImpAttr(VtValue const &defaultValue, bool writeSparsely) const
+{
+    return UsdSchemaBase::_CreateAttr(MjcPhysicsTokens->mjcSolimp,
+                       SdfValueTypeNames->DoubleArray,
+                       /* custom = */ false,
+                       SdfVariabilityUniform,
+                       defaultValue,
+                       writeSparsely);
 }
 
-UsdAttribute MjcPhysicsCollisionAPI::CreateSolMixAttr(
-    VtValue const& defaultValue, bool writeSparsely) const {
-  return UsdSchemaBase::_CreateAttr(
-      MjcPhysicsTokens->mjcSolmix, SdfValueTypeNames->Double,
-      /* custom = */ false, SdfVariabilityUniform, defaultValue, writeSparsely);
+UsdAttribute
+MjcPhysicsCollisionAPI::GetMarginAttr() const
+{
+    return GetPrim().GetAttribute(MjcPhysicsTokens->mjcMargin);
 }
 
-UsdAttribute MjcPhysicsCollisionAPI::GetSolRefAttr() const {
-  return GetPrim().GetAttribute(MjcPhysicsTokens->mjcSolref);
+UsdAttribute
+MjcPhysicsCollisionAPI::CreateMarginAttr(VtValue const &defaultValue, bool writeSparsely) const
+{
+    return UsdSchemaBase::_CreateAttr(MjcPhysicsTokens->mjcMargin,
+                       SdfValueTypeNames->Double,
+                       /* custom = */ false,
+                       SdfVariabilityUniform,
+                       defaultValue,
+                       writeSparsely);
 }
 
-UsdAttribute MjcPhysicsCollisionAPI::CreateSolRefAttr(
-    VtValue const& defaultValue, bool writeSparsely) const {
-  return UsdSchemaBase::_CreateAttr(
-      MjcPhysicsTokens->mjcSolref, SdfValueTypeNames->DoubleArray,
-      /* custom = */ false, SdfVariabilityUniform, defaultValue, writeSparsely);
+UsdAttribute
+MjcPhysicsCollisionAPI::GetGapAttr() const
+{
+    return GetPrim().GetAttribute(MjcPhysicsTokens->mjcGap);
 }
 
-UsdAttribute MjcPhysicsCollisionAPI::GetSolImpAttr() const {
-  return GetPrim().GetAttribute(MjcPhysicsTokens->mjcSolimp);
-}
-
-UsdAttribute MjcPhysicsCollisionAPI::CreateSolImpAttr(
-    VtValue const& defaultValue, bool writeSparsely) const {
-  return UsdSchemaBase::_CreateAttr(
-      MjcPhysicsTokens->mjcSolimp, SdfValueTypeNames->DoubleArray,
-      /* custom = */ false, SdfVariabilityUniform, defaultValue, writeSparsely);
-}
-
-UsdAttribute MjcPhysicsCollisionAPI::GetMarginAttr() const {
-  return GetPrim().GetAttribute(MjcPhysicsTokens->mjcMargin);
-}
-
-UsdAttribute MjcPhysicsCollisionAPI::CreateMarginAttr(
-    VtValue const& defaultValue, bool writeSparsely) const {
-  return UsdSchemaBase::_CreateAttr(
-      MjcPhysicsTokens->mjcMargin, SdfValueTypeNames->Double,
-      /* custom = */ false, SdfVariabilityUniform, defaultValue, writeSparsely);
-}
-
-UsdAttribute MjcPhysicsCollisionAPI::GetGapAttr() const {
-  return GetPrim().GetAttribute(MjcPhysicsTokens->mjcGap);
-}
-
-UsdAttribute MjcPhysicsCollisionAPI::CreateGapAttr(VtValue const& defaultValue,
-                                                   bool writeSparsely) const {
-  return UsdSchemaBase::_CreateAttr(
-      MjcPhysicsTokens->mjcGap, SdfValueTypeNames->Double,
-      /* custom = */ false, SdfVariabilityUniform, defaultValue, writeSparsely);
+UsdAttribute
+MjcPhysicsCollisionAPI::CreateGapAttr(VtValue const &defaultValue, bool writeSparsely) const
+{
+    return UsdSchemaBase::_CreateAttr(MjcPhysicsTokens->mjcGap,
+                       SdfValueTypeNames->Double,
+                       /* custom = */ false,
+                       SdfVariabilityUniform,
+                       defaultValue,
+                       writeSparsely);
 }
 
 namespace {
-static inline TfTokenVector _ConcatenateAttributeNames(
-    const TfTokenVector& left, const TfTokenVector& right) {
-  TfTokenVector result;
-  result.reserve(left.size() + right.size());
-  result.insert(result.end(), left.begin(), left.end());
-  result.insert(result.end(), right.begin(), right.end());
-  return result;
+static inline TfTokenVector
+_ConcatenateAttributeNames(const TfTokenVector& left,const TfTokenVector& right)
+{
+    TfTokenVector result;
+    result.reserve(left.size() + right.size());
+    result.insert(result.end(), left.begin(), left.end());
+    result.insert(result.end(), right.begin(), right.end());
+    return result;
 }
-}  // namespace
+}
 
 /*static*/
-const TfTokenVector& MjcPhysicsCollisionAPI::GetSchemaAttributeNames(
-    bool includeInherited) {
-  static TfTokenVector localNames = {
-      MjcPhysicsTokens->mjcGroup,    MjcPhysicsTokens->mjcShellinertia,
-      MjcPhysicsTokens->mjcPriority, MjcPhysicsTokens->mjcCondim,
-      MjcPhysicsTokens->mjcSolmix,   MjcPhysicsTokens->mjcSolref,
-      MjcPhysicsTokens->mjcSolimp,   MjcPhysicsTokens->mjcMargin,
-      MjcPhysicsTokens->mjcGap,
-  };
-  static TfTokenVector allNames = _ConcatenateAttributeNames(
-      UsdAPISchemaBase::GetSchemaAttributeNames(true), localNames);
+const TfTokenVector&
+MjcPhysicsCollisionAPI::GetSchemaAttributeNames(bool includeInherited)
+{
+    static TfTokenVector localNames = {
+        MjcPhysicsTokens->mjcGroup,
+        MjcPhysicsTokens->mjcShellinertia,
+        MjcPhysicsTokens->mjcPriority,
+        MjcPhysicsTokens->mjcCondim,
+        MjcPhysicsTokens->mjcSolmix,
+        MjcPhysicsTokens->mjcSolref,
+        MjcPhysicsTokens->mjcSolimp,
+        MjcPhysicsTokens->mjcMargin,
+        MjcPhysicsTokens->mjcGap,
+    };
+    static TfTokenVector allNames =
+        _ConcatenateAttributeNames(
+            UsdAPISchemaBase::GetSchemaAttributeNames(true),
+            localNames);
 
-  if (includeInherited)
-    return allNames;
-  else
-    return localNames;
+    if (includeInherited)
+        return allNames;
+    else
+        return localNames;
 }
 
 PXR_NAMESPACE_CLOSE_SCOPE
