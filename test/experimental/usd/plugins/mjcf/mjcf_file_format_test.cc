@@ -78,6 +78,7 @@ PXR_NAMESPACE_OPEN_SCOPE
 // clang-format off
 TF_DEFINE_PRIVATE_TOKENS(_tokens,
                          (st)
+                         ((newtonJointAPI, "NewtonJointAPI"))
                          );
 // clang-format on
 PXR_NAMESPACE_CLOSE_SCOPE
@@ -1794,6 +1795,7 @@ TEST_F(MjcfSdfFileFormatPluginTest, TestMjcPhysicsJointAPI) {
 
   const SdfPath joint_path("/test/parent/child/my_joint");
   EXPECT_PRIM_API_APPLIED(stage, joint_path, pxr::MjcPhysicsJointAPI);
+  EXPECT_PRIM_API_APPLIED_BY_NAME(stage, joint_path, pxr::_tokens->newtonJointAPI);
 
   ExpectAttributeEqual(stage, "/test/parent/child/my_joint.mjc:group", 4);
   ExpectAttributeEqual(stage, "/test/parent/child/my_joint.mjc:springdamper",
@@ -1819,7 +1821,7 @@ TEST_F(MjcfSdfFileFormatPluginTest, TestMjcPhysicsJointAPI) {
   ExpectAttributeEqual(stage, "/test/parent/child/my_joint.mjc:margin", 1.8);
   ExpectAttributeEqual(stage, "/test/parent/child/my_joint.mjc:ref", 1.9);
   ExpectAttributeEqual(stage, "/test/parent/child/my_joint.mjc:springref", 2.0);
-  ExpectAttributeEqual(stage, "/test/parent/child/my_joint.mjc:armature", 2.1);
+  ExpectAttributeEqual(stage, "/test/parent/child/my_joint.newton:armature", 2.1);
   ExpectAttributeEqual(stage, "/test/parent/child/my_joint.mjc:damping", 2.2);
   ExpectAttributeEqual(stage, "/test/parent/child/my_joint.mjc:frictionloss",
                        2.3);

@@ -73,6 +73,23 @@
 #include <pxr/usd/usdShade/material.h>
 #include <pxr/usd/usdShade/materialBindingAPI.h>
 
+namespace {
+
+  // Using to satisfy TF_DEFINE_PRIVATE_TOKENS macro below and avoid operating in
+// PXR_NS.
+using pxr::TfToken;
+template <typename T>
+using TfStaticData = pxr::TfStaticData<T>;
+
+// clang-format off
+TF_DEFINE_PRIVATE_TOKENS(kTokens,
+                         ((newtonJointAPI, "NewtonJointAPI"))
+                         ((newtonJointArmature, "newton:armature"))
+                        );
+// clang-format on
+
+}
+
 namespace mujoco {
 namespace usd {
 
@@ -1416,6 +1433,15 @@ void ParseMjcPhysicsActuator(mjSpec* spec,
   }
 }
 
+void ParseNewtonJointAPI(mjsJoint* mj_joint, const pxr::UsdPrim& prim) {
+  auto armature_attr = prim.GetAttribute(kTokens->newtonJointArmature);
+  if (armature_attr.HasAuthoredValue()) {
+    double armature;
+    armature_attr.Get(&armature);
+    mj_joint->armature = armature;
+  }
+}
+
 void ParseMjcPhysicsJointAPI(mjsJoint* mj_joint,
                              const pxr::MjcPhysicsJointAPI& joint_api) {
   auto group_attr = joint_api.GetGroupAttr();
@@ -1567,6 +1593,9 @@ void ParseMjcPhysicsJointAPI(mjsJoint* mj_joint,
 
   auto armature_attr = joint_api.GetMjcArmatureAttr();
   if (armature_attr.HasAuthoredValue()) {
+    mju_warning(
+      "The 'mjc:armature' attribute for joint %s is deprecated, use NewtonJointAPI with 'newton:armature' instead",
+      mjs_getName(mj_joint->element)->c_str());
     double armature;
     armature_attr.Get(&armature);
     mj_joint->armature = armature;
@@ -1874,6 +1903,9 @@ void ParseUsdPhysicsJoint(mjSpec* spec, const pxr::UsdPrim& prim, mjsBody* body,
     SetDoubleArrFromGfVec3d(mj_joint->axis, rotated_axis);
   }
 
+  if (prim.HasAPI(kTokens->newtonJointAPI)) {
+    ParseNewtonJointAPI(mj_joint, prim);
+  }
   if (prim.HasAPI<pxr::MjcPhysicsJointAPI>()) {
     ParseMjcPhysicsJointAPI(mj_joint, pxr::MjcPhysicsJointAPI(prim));
   }

@@ -44,9 +44,19 @@
     EXPECT_TRUE((stage)->GetPrimAtPath(SdfPath(path)).HasAPI<api>()); \
   }
 
+#define EXPECT_PRIM_API_APPLIED_BY_NAME(stage, path, apiTypeName)           \
+  {                                                                         \
+    EXPECT_TRUE((stage)->GetPrimAtPath(SdfPath(path)).HasAPI(apiTypeName)); \
+  }
+
 #define EXPECT_PRIM_API_NOT_APPLIED(stage, path, api)                  \
   {                                                                    \
     EXPECT_FALSE((stage)->GetPrimAtPath(SdfPath(path)).HasAPI<api>()); \
+  }
+
+  #define EXPECT_PRIM_API_NOT_APPLIED_BY_NAME(stage, path, apiTypeName)      \
+  {                                                                          \
+    EXPECT_FALSE((stage)->GetPrimAtPath(SdfPath(path)).HasAPI(apiTypeName)); \
   }
 
 #define EXPECT_PRIM_KIND(stage, path, kind)                          \

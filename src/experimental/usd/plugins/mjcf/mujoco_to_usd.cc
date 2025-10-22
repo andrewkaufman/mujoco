@@ -114,6 +114,8 @@ TF_DEFINE_PRIVATE_TOKENS(kTokens,
                          ((sourceMesh, pxr::UsdGeomTokens->Mesh))
                          ((inputsNormal, "inputs:normal"))
                          ((joint, "Joint"))
+                         ((newtonJointAPI, "NewtonJointAPI"))
+                         ((newtonJointArmature, "newton:armature"))
                         );
 
 // Using to satisfy TF_REGISTRY_FUNCTION macro below and avoid operating in PXR_NS.
@@ -2015,8 +2017,9 @@ class ModelWriter {
         }
       }
 
-      // Finally write the mjcPhysicsJointAPI attributes.
+      // Finally write the newton and mjcPhysicsJointAPI attributes.
       ApplyApiSchema(data_, joint_path, MjcPhysicsTokens->MjcJointAPI);
+      ApplyApiSchema(data_, joint_path, kTokens->newtonJointAPI);
 
       WriteUniformAttribute(joint_path, pxr::SdfValueTypeNames->Int,
                             MjcPhysicsTokens->mjcGroup, joint->group);
@@ -2083,7 +2086,7 @@ class ModelWriter {
                             MjcPhysicsTokens->mjcSpringref, joint->springref);
 
       WriteUniformAttribute(joint_path, pxr::SdfValueTypeNames->Double,
-                            MjcPhysicsTokens->mjcArmature, joint->armature);
+                            kTokens->newtonJointArmature, joint->armature);
 
       WriteUniformAttribute(joint_path, pxr::SdfValueTypeNames->Double,
                             MjcPhysicsTokens->mjcDamping, joint->damping);

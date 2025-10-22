@@ -59,6 +59,50 @@ function(configure_and_install_usd_plugin_info plugin_name source_subpath instal
   )
 endfunction()
 
+function(install_newton_usd_plugin install_base_dir)
+  # Fetch newton-usd-schemas repository using FetchContent directly
+  include(FetchContent)
+
+  # Get the Newton USD Schemas host URL from environment variable
+  if(NOT DEFINED ENV{NEWTON_USD_SCHEMAS_HOST})
+    message(FATAL_ERROR "NEWTON_USD_SCHEMAS_HOST environment variable must be set to fetch newton-usd-schemas")
+  endif()
+
+  FetchContent_Declare(
+    newton-usd-schemas
+    GIT_REPOSITORY $ENV{NEWTON_USD_SCHEMAS_HOST}/newton-physics/newton-usd-schemas.git
+    GIT_TAG main
+    GIT_SHALLOW TRUE
+    UPDATE_DISCONNECTED TRUE
+  )
+
+  # Just populate the content without trying to add it as a subdirectory
+  FetchContent_GetProperties(newton-usd-schemas)
+  if(NOT newton-usd-schemas_POPULATED)
+    FetchContent_Populate(newton-usd-schemas)
+  endif()
+
+  # Use the fetched newton_usd_schemas directory
+  set(NEWTON_USD_DIR "${newton-usd-schemas_SOURCE_DIR}/newton_usd_schemas")
+  if(NOT EXISTS "${NEWTON_USD_DIR}")
+    message(FATAL_ERROR "newton_usd_schemas directory not found in fetched repository")
+  endif()
+
+  set(PLUG_INFO_LIBRARY_PATH "")
+  set(OUTPUT_DIR "${CMAKE_BINARY_DIR}/${install_base_dir}/resources/newton")
+  set(OUTPUT_FILE "${OUTPUT_DIR}/plugInfo.json")
+
+  # Create the output directory if it doesn't exist
+  file(MAKE_DIRECTORY "${OUTPUT_DIR}")
+
+  install(FILES "${NEWTON_USD_DIR}/plugInfo.json"
+    DESTINATION "${install_base_dir}/resources/newton"
+  )
+  install(FILES "${NEWTON_USD_DIR}/generatedSchema.usda"
+    DESTINATION "${install_base_dir}/resources/newton"
+  )
+endfunction()
+
 # Function to apply Houdini-specific link directories and include paths
 function(configure_houdini_target target_name link_scope include_scope)
   set(HOUDINI_LIBS_DIR "${HOUDINI_HFS_DIR}/../Libraries")
@@ -258,6 +302,9 @@ configure_and_install_usd_plugin_info(
 configure_and_install_usd_plugin_info(
   ${MJC_PHYSICS_PLUGIN_TARGET_NAME}
   mjcPhysics
+  ${MJ_USD_INSTALL_DIR_LIB}
+)
+install_newton_usd_plugin(
   ${MJ_USD_INSTALL_DIR_LIB}
 )
 

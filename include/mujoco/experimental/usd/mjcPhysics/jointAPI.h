@@ -477,7 +477,11 @@ public:
     // --------------------------------------------------------------------- //
     // MJCARMATURE 
     // --------------------------------------------------------------------- //
+    /// 
+    /// DEPRECATED: Please use NewtonJointAPI with newton:armature instead.
+    /// 
     /// Additional inertia associated with movement of the joint that is not due to body mass. This added inertia is usually due to a rotor (a.k.a armature) spinning faster than the joint itself due to a geared transmission. The value applies to all degrees of freedom created by this joint. Besides increasing the realism of joints with geared transmission, positive armature significantly improves simulation stability, even for small values, and is a recommended possible fix when encountering stability issues.
+    /// 
     ///
     /// | ||
     /// | -- | -- |
